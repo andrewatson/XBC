@@ -158,7 +158,11 @@ size_t BlockTransformation::AdvancedProcessBlocks(const byte *inBlocks, const by
 
 	while (length >= blockSize)
 	{
-		if (flags & BT_XorInput)
+		if( flags&DONTDOANYTHING)
+		{
+			ProcessBlock(outBlocks);
+		}
+		else if(flags & BT_XorInput)
 		{
 			xorbuf(outBlocks, xorBlocks, inBlocks, blockSize);
 			ProcessBlock(outBlocks);

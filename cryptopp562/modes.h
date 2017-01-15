@@ -59,6 +59,19 @@ public:
 			this->Resynchronize(iv);
 	}
 
+	void SetCipherWithIV(BlockCipher &cipher, const byte *iv1, const byte *iv2)
+	{
+		this->ThrowIfInvalidIV(iv1);
+		this->ThrowIfInvalidIV(iv2);
+		this->m_cipher = &cipher;
+		this->ResizeBuffers();
+		this->SetFeedbackSize(0);
+		if (this->IsResynchronizable())
+		{
+			this->Resynchronize2(iv1,iv2);
+		}
+	}
+
 protected:
 	CipherModeBase() : m_cipher(NULL) {}
 	inline unsigned int BlockSize() const {assert(m_register.size() > 0); return (unsigned int)m_register.size();}
@@ -70,10 +83,12 @@ protected:
 	virtual void ResizeBuffers()
 	{
 		m_register.New(m_cipher->BlockSize());
+		m_register2.New(m_cipher->BlockSize());
 	}
 
 	BlockCipher *m_cipher;
 	AlignedSecByteBlock m_register;
+	AlignedSecByteBlock m_register2;
 };
 
 template <class POLICY_INTERFACE>
@@ -165,8 +180,15 @@ public:
 	bool IsRandomAccess() const {return false;}
 	bool IsSelfInverting() const {return false;}
 	bool IsForwardTransformation() const {return m_cipher->IsForwardTransformation();}
-	void Resynchronize(const byte *iv, int length=-1) {memcpy_s(m_register, m_register.size(), iv, ThrowIfInvalidIVLength(length));}
-
+	void Resynchronize(const byte *iv, int length=-1) 
+	{
+		memcpy_s(m_register, m_register.size(), iv, ThrowIfInvalidIVLength(length));
+	}
+	void Resynchronize2(const byte *iv1, const byte *iv2, int length=-1) 
+	{
+		memcpy_s(m_register, m_register.size(), iv1, ThrowIfInvalidIVLength(length));
+		memcpy_s(m_register2, m_register2.size(), iv2, ThrowIfInvalidIVLength(length));
+	}
 protected:
 	bool RequireAlignedInput() const {return true;}
 	void ResizeBuffers()
@@ -197,6 +219,49 @@ public:
 	unsigned int MinLastBlockSize() const {return 0;}
 	static const char * CRYPTOPP_API StaticAlgorithmName() {return "CBC";}
 };
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE XBC_ModeBase : public BlockOrientedCipherModeBase
+{
+public:
+	IV_Requirement IVRequirement() const {return UNPREDICTABLE_RANDOM_IV;}
+	bool RequireAlignedInput() const {return false;}
+	unsigned int MinLastBlockSize() const {return 0;}
+	static const char * CRYPTOPP_API StaticAlgorithmName() {return "XBC";}
+};
+
+
+class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE XBC_Encryption : public XBC_ModeBase
+{
+public:
+	void ProcessData(byte *outString, const byte *inString, size_t length);
+};
+
+class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE XBC_Decryption : public XBC_ModeBase
+{
+public:
+	void ProcessData(byte *outString, const byte *inString, size_t length);
+	
+protected:
+	void ResizeBuffers()
+	{
+		BlockOrientedCipherModeBase::ResizeBuffers();
+		m_temp.New(BlockSize());
+	}
+	AlignedSecByteBlock m_temp;
+};
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
 
 class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE CBC_Encryption : public CBC_ModeBase
 {
@@ -283,6 +348,8 @@ public:
 		{this->SetCipher(cipher);}
 	CipherModeFinalTemplate_ExternalCipher(BlockCipher &cipher, const byte *iv, int feedbackSize = 0)
 		{this->SetCipherWithIV(cipher, iv, feedbackSize);}
+	CipherModeFinalTemplate_ExternalCipher(BlockCipher &cipher, const byte *iv1, const byte *iv2)
+		{this->SetCipherWithIV(cipher, iv1, iv2);}
 
 	std::string AlgorithmName() const
 		{return (this->m_cipher ? this->m_cipher->AlgorithmName() + "/" : std::string("")) + BASE::StaticAlgorithmName();}
@@ -384,6 +451,13 @@ struct CBC_Mode : public CipherModeDocumentation
 
 CRYPTOPP_DLL_TEMPLATE_CLASS CipherModeFinalTemplate_ExternalCipher<CBC_Encryption>;
 CRYPTOPP_DLL_TEMPLATE_CLASS CipherModeFinalTemplate_ExternalCipher<CBC_Decryption>;
+
+struct XBC_Mode_ExternalCipher : public CipherModeDocumentation
+{
+	typedef CipherModeFinalTemplate_ExternalCipher<XBC_Encryption> Encryption;
+	typedef CipherModeFinalTemplate_ExternalCipher<XBC_Decryption> Decryption;
+};
+
 
 //! CBC mode, external cipher
 struct CBC_Mode_ExternalCipher : public CipherModeDocumentation

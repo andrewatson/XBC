@@ -3,6 +3,8 @@
 
 #include "cryptlib.h"
 
+bool MyTest();
+
 bool ValidateAll(bool thorough);
 bool TestSettings();
 bool TestOS_RNG();

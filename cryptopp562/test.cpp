@@ -114,6 +114,10 @@ int CRYPTOPP_API main(int argc, char *argv[])
 	argc = ccommand(&argv);
 #endif
 
+	MyTest();
+
+	return 0;
+
 	try
 	{
 		RegisterFactories();

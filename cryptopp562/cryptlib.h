@@ -400,6 +400,7 @@ public:
 	virtual unsigned int MaxIVLength() const {return IVSize();}
 	//! resynchronize with an IV. ivLength=-1 means use IVSize()
 	virtual void Resynchronize(const byte *iv, int ivLength=-1) {throw NotImplemented(GetAlgorithm().AlgorithmName() + ": this object doesn't support resynchronization");}
+	virtual void Resynchronize2(const byte *iv1, const byte *iv2, int ivLength=-1) {throw NotImplemented(GetAlgorithm().AlgorithmName() + ": this object doesn't support resynchronization");}
 	//! get a secure IV for the next message
 	/*! This method should be called after you finish encrypting one message and are ready to start the next one.
 		After calling it, you must call SetKey() or Resynchronize() before using this object again. 
@@ -456,7 +457,7 @@ public:
 	//! return number of blocks that can be processed in parallel, for bit-slicing implementations
 	virtual unsigned int OptimalNumberOfParallelBlocks() const {return 1;}
 
-	enum {BT_InBlockIsCounter=1, BT_DontIncrementInOutPointers=2, BT_XorInput=4, BT_ReverseDirection=8, BT_AllowParallel=16} FlagsForAdvancedProcessBlocks;
+	enum {BT_InBlockIsCounter=1, BT_DontIncrementInOutPointers=2, BT_XorInput=4, BT_ReverseDirection=8, BT_AllowParallel=16, DONTDOANYTHING=32} FlagsForAdvancedProcessBlocks;
 
 	//! encrypt and xor blocks according to flags (see FlagsForAdvancedProcessBlocks)
 	/*! /note If BT_InBlockIsCounter is set, last byte of inBlocks may be modified. */

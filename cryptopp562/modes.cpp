@@ -152,6 +152,339 @@ void ECB_OneWay::ProcessData(byte *outString, const byte *inString, size_t lengt
 	m_cipher->AdvancedProcessBlocks(inString, NULL, outString, length, BlockTransformation::BT_AllowParallel);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+
+void XBC_Encryption::ProcessData(byte *outString, const byte *inString, size_t length)
+{
+	if (!length)
+		return;
+	
+	assert(length%BlockSize()==0);
+
+	unsigned int blockSize = BlockSize();
+	
+	/////////////////////////////////////////////////////////////////////////
+	//xorbuf(outString, m_register, inString, blockSize);
+	//m_cipher->AdvancedProcessBlocks(inString, m_register, outString, blockSize, BlockTransformation::DONTDOSHIT);
+	//length -= blockSize;
+
+	//while (length >= blockSize)
+	//{
+	//	outString+=blockSize;
+	//	inString+=blockSize;
+
+	//	xorbuf(outString, outString-blockSize, inString, blockSize);
+	//	m_cipher->AdvancedProcessBlocks(inString, outString-blockSize, outString, blockSize, BlockTransformation::DONTDOSHIT);
+	//	length -= blockSize;
+	//}
+	//
+	//memcpy(m_register, outString, BlockSize());
+	/////////////////////////////////////////////////////////////////////////
+
+
+	byte temp[512];
+
+		printf("PT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(inString))[i]));
+		}
+		printf("\n");
+
+	xorbuf(outString, m_register, inString, blockSize);
+
+		printf("IV1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		}
+		printf("\n");
+
+	memcpy(m_register, outString, blockSize);
+
+		printf("N2:\t");
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		//}
+
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+	
+	m_cipher->AdvancedProcessBlocks(inString, m_register, outString, blockSize, BlockTransformation::DONTDOSHIT);
+
+		printf("N1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+	
+		printf("IV2:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		}
+		printf("\n");
+
+//	memcpy(temp, outString, blockSize);
+
+	xorbuf(outString, m_register2, outString, blockSize);
+	
+		printf("CT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+	memcpy(m_register2, m_register, blockSize);
+	//memcpy(m_register, temp, blockSize);
+	memcpy(m_register, outString, blockSize);
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r1%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		//}
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r2%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		//}
+
+	length -= blockSize;
+
+
+
+	while (length >= blockSize)
+	{
+		outString+=blockSize;
+		inString+=blockSize;
+
+
+
+		xorbuf(outString, m_register, inString, blockSize);
+		memcpy(m_register, outString, blockSize);
+
+
+
+		m_cipher->AdvancedProcessBlocks(inString, NULL, outString, blockSize, BlockTransformation::DONTDOSHIT);
+
+		memcpy(temp, outString, blockSize);
+		xorbuf(outString, m_register2, outString, blockSize);
+	
+		memcpy(m_register2, m_register, blockSize);
+		memcpy(m_register, temp, blockSize);
+
+
+
+		length -= blockSize;
+	}
+
+	printf("\n");
+
+	//memcpy(m_register, outString, BlockSize());
+}
+
+
+void XBC_Decryption::ProcessData(byte *outString, const byte *inString, size_t length)
+{
+	if (!length)
+		return;
+
+	assert(length%BlockSize()==0);
+
+	unsigned int blockSize = BlockSize();
+	
+	/////////////////////////////////////////////////////////////////////////
+	//memcpy(outString, inString, blockSize);
+	//m_cipher->AdvancedProcessBlocks(inString, m_register, outString, blockSize, BlockTransformation::DONTDOSHIT);
+	//xorbuf(outString, m_register, outString, blockSize);	
+	//length -= blockSize;
+
+	//while (length >= blockSize)
+	//{
+	//	outString+=blockSize;
+	//	inString+=blockSize;
+
+	//	memcpy(outString, inString, blockSize);
+	//	m_cipher->AdvancedProcessBlocks(inString, outString-blockSize, outString, blockSize, BlockTransformation::DONTDOSHIT);
+	//	xorbuf(outString, inString-blockSize, outString, blockSize);
+	//	length -= blockSize;
+	//}
+	/////////////////////////////////////////////////////////////////////////
+
+	byte temp[512];
+
+		printf("IV2:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		}
+		printf("\n");
+
+		printf("CT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(inString))[i]));
+		}
+		printf("\n");
+
+	xorbuf(outString, m_register2, inString, blockSize);
+	memcpy(m_register2, inString, blockSize);
+	//memcpy(m_register2, outString, blockSize);
+		printf("N1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r2%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		//}
+
+	m_cipher->AdvancedProcessBlocks(inString, m_register, outString, blockSize, BlockTransformation::DONTDOSHIT);
+
+		printf("N2:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+	memcpy(temp, outString, blockSize);
+
+		printf("IV1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		}
+		printf("\n");
+
+	xorbuf(outString, m_register, outString, blockSize);	
+
+		printf("PT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+	memcpy(m_register, m_register2, blockSize);	
+	memcpy(m_register2, temp, blockSize);
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r1%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		//}
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r2%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		//}
+
+	length -= blockSize;
+
+	printf("\n");
+
+	while (length >= blockSize)
+	{
+		outString+=blockSize;
+		inString+=blockSize;
+
+		printf("CT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(inString))[i]));
+		}
+		printf("\n");
+
+		printf("IV2:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		}
+		printf("\n");
+
+		xorbuf(outString, m_register2, inString, blockSize);
+		memcpy(m_register2, outString, blockSize);
+
+		printf("N1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+
+		m_cipher->AdvancedProcessBlocks(inString, NULL, outString, blockSize, BlockTransformation::DONTDOSHIT);
+	
+		printf("N2:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+		memcpy(temp, outString, blockSize);
+
+		printf("IV1:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		}
+		printf("\n");
+
+		xorbuf(outString, m_register, outString, blockSize);	
+
+		printf("PT:\t");
+		for(unsigned i=0; i<16; i++)
+		{
+			printf("%02X ", (unsigned char)(((char*)(outString))[i]));
+		}
+		printf("\n");
+
+		memcpy(m_register, m_register2, blockSize);	
+		memcpy(m_register2, temp, blockSize);
+
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r1%02X ", (unsigned char)(((char*)((void*)m_register))[i]));
+		//}
+
+		//for(unsigned i=0; i<16; i++)
+		//{
+		//	printf("r2%02X ", (unsigned char)(((char*)((void*)m_register2))[i]));
+		//}
+				
+		length -= blockSize;
+
+	printf("\n");
+
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+
+
 void CBC_Encryption::ProcessData(byte *outString, const byte *inString, size_t length)
 {
 	if (!length)

@@ -499,7 +499,7 @@ bool TestFilter(BufferedTransformation &bt, const byte *in, size_t inLen, const 
 
 	while (inLen)
 	{
-		size_t randomLen = GlobalRNG().GenerateWord32(0, (word32)inLen);
+		size_t randomLen = inLen;//GlobalRNG().GenerateWord32(0, (word32)inLen);
 		bt.Put(in, randomLen);
 		in += randomLen;
 		inLen -= randomLen;
@@ -542,12 +542,310 @@ bool TestModeIV(SymmetricCipher &e, SymmetricCipher &d)
 		e.Resynchronize(iv);
 		d.Resynchronize(iv);
 
-		unsigned int length = STDMAX(GlobalRNG().GenerateWord32(0, i), (word32)e.MinLastBlockSize());
+		unsigned int length = STDMAX( i, (word32)e.MinLastBlockSize());//STDMAX(GlobalRNG().GenerateWord32(0, i), (word32)e.MinLastBlockSize());
 		GlobalRNG().GenerateBlock(plaintext, length);
 
 		if (!TestFilter(filter, plaintext, length, plaintext, length))
 			return false;
 	}
+
+	return true;
+}
+
+
+bool MyTest()
+{
+	//const byte key[] = {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef};
+	//const byte iv[] = {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+	//const byte iv2[] = {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+	//const byte plain[] = {	// "Now is the time for all " without tailing 0
+	//	0x4e,0x6f,0x77,0x20,0x69,0x73,0x20,0x74,
+	//	0x68,0x65,0x20,0x74,0x69,0x6d,0x65,0x20,
+	//	0x66,0x6f,0x72,0x20,0x61,0x6c,0x6c,0x20};
+
+	//bool pass=true, fail;
+
+
+
+	//{
+	//	// from FIPS 81
+	//	const byte encrypted[] = {
+	//		0x3f, 0xa4, 0x0e, 0x8a, 0x98, 0x4d, 0x48, 0x15,
+	//		0x6a, 0x27, 0x17, 0x87, 0xab, 0x88, 0x83, 0xf9,
+	//		0x89, 0x3d, 0x51, 0xec, 0x4b, 0x56, 0x3b, 0x53};
+
+	//	ECB_Mode_ExternalCipher::Encryption modeE(desE);
+	//	fail = !TestFilter(StreamTransformationFilter(modeE, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//		plain, sizeof(plain), encrypted, sizeof(encrypted));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "ECB encryption" << endl;
+	//	
+	//	ECB_Mode_ExternalCipher::Decryption modeD(desD);
+	//	fail = !TestFilter(StreamTransformationFilter(modeD, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//		encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "ECB decryption" << endl;
+	//}
+
+
+	//{
+	//	const byte key[] = {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef};
+	//	const byte iv[] = {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+	//	const byte iv2[] = {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+	//	const byte plain[] = {	// "Now is the time for all " without tailing 0
+	//		0x4e,0x6f,0x77,0x20,0x69,0x73,0x20,0x74,
+	//		0x68,0x65,0x20,0x74,0x69,0x6d,0x65,0x20,
+	//		0x66,0x6f,0x72,0x20,0x61,0x6c,0x6c,0x20};
+	//	DESEncryption desE(key);
+	//	DESDecryption desD(key);
+
+	//	//// from FIPS 81
+	//	//const byte encrypted[] = {
+	//	//	0xE5, 0xC7, 0xCD, 0xDE, 0x87, 0x2B, 0xF2, 0x7C, 
+	//	//	0x43, 0xE9, 0x34, 0x00, 0x8C, 0x38, 0x9C, 0x0F, 
+	//	//	0x68, 0x37, 0x88, 0x49, 0x9A, 0x7C, 0x05, 0xF6};
+
+	//	for(unsigned i=0; i<sizeof(plain); i++)
+	//	{
+	//		printf("%02X ", (unsigned char)plain[i]);
+	//	}
+
+	//	printf("\n");
+
+	//	std::string encryptedString;
+	//	XBC_Mode_ExternalCipher::Encryption modeE(desE, iv, iv2);
+	//	StreamTransformationFilter enc(modeE, new StringSink(encryptedString), StreamTransformationFilter::NO_PADDING);
+	//	enc.Put((byte *)plain, sizeof(plain));
+	//	enc.MessageEnd();
+	//	
+	//	const char* encryptedCString = encryptedString.c_str();
+	//	unsigned len = strlen(encryptedCString);
+
+	//	for(unsigned i=0; i<encryptedString.length(); i++)
+	//	{
+	//		printf("%02X ", (unsigned char)encryptedCString[i]);
+	//	}
+
+	//	printf("\n");
+
+	//	//fail = !TestFilter(StreamTransformationFilter(modeE, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//	//	plain, sizeof(plain), encrypted, sizeof(encrypted));
+	//	//pass = pass && !fail;
+	//	//cout << (fail ? "FAILED   " : "passed   ") << "XBC encryption with no padding" << endl;
+	//	//
+	//	//XBC_Mode_ExternalCipher::Decryption modeD(desD, iv);
+	//	//fail = !TestFilter(StreamTransformationFilter(modeD, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//	//	encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	//pass = pass && !fail;
+	//	//cout << (fail ? "FAILED   " : "passed   ") << "XBC decryption with no padding" << endl;
+
+	//	std::string dencryptedString;
+	//	XBC_Mode_ExternalCipher::Decryption modeD(desD, iv, iv2);
+	//	StreamTransformationFilter dec(modeD, new StringSink(dencryptedString), StreamTransformationFilter::NO_PADDING);
+	//	dec.Put((byte *)encryptedCString, encryptedString.length());
+	//	dec.MessageEnd();
+
+	//	const char* dencryptedCString = dencryptedString.c_str();
+	//	unsigned delen = strlen(dencryptedCString);
+
+	//	for(unsigned i=0; i<dencryptedString.length(); i++)
+	//	{
+	//		printf("%02X ", (unsigned char)dencryptedCString[i]);
+	//	}
+
+	//	printf("\n\n");
+
+	//	//fail = !TestModeIV(modeE, modeD);
+	//	//pass = pass && !fail;
+	//	//cout << (fail ? "FAILED   " : "passed   ") << "CBC mode IV generation" << endl;
+	//}
+
+
+
+	{
+		//// test 2
+		//const byte key[] = { 0xE5, 0xC7, 0xCD, 0xDE, 0x87, 0x2B, 0xF2, 0x7C, 0x43, 0xE9, 0x34, 0x00, 0x8C, 0x38, 0x9C, 0x0F }; //{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//{0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//
+		//const byte iv[] =  { 0xF3, 0x09, 0x62, 0x49, 0xC7, 0xF4, 0x6E, 0x51, 0xA6, 0x9E, 0x83, 0x9B, 0x1A, 0x92, 0xF7, 0x84 }; // {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+		//const byte iv2[] = { 0x4e, 0x6f, 0x77, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x74, 0x69, 0x6d, 0x65, 0x20 }; // {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+		//const byte plain[] =
+		//{
+		//	0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,
+		//	0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,
+		//	0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+
+		////const byte plain[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+		//const byte plain[] = {	// "Now is the time for all " without tailing 0
+		//0x4e,0x6f,0x77,0x20,0x69,0x73,0x20,0x74,
+		//0x68,0x65,0x20,0x74,0x69,0x6d,0x65,0x20,
+		//0x66,0x6f,0x72,0x20,0x61,0x6c,0x6c,0x20};
+
+
+		//// test 1
+		//const byte key[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//{0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//
+		//const byte iv[] =  {0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00};
+		//const byte iv2[] = {0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF};
+		//const byte plain[] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+
+
+		// test 3
+		const byte key[] = { 0xA4, 0xB2, 0xFF, 0x1C, 0x29, 0x21, 0xB2, 0x88, 0x34, 0xAB, 0x71, 0x3D, 0x50, 0xCC, 0xB4, 0x7E }; //{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//{0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//
+		const byte iv[] =  { 0x4c, 0xe3, 0xa2, 0xb7, 0x55, 0x57, 0x93, 0x98, 0x81, 0x26, 0x52, 0x0e, 0xac, 0xf2, 0xe3, 0x06 }; // {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+		const byte iv2[] = { 0x7a, 0x62, 0x3e, 0xf8, 0x4c, 0x3d, 0x33, 0xc1, 0x95, 0xd2, 0x3e, 0xe3, 0x20, 0xc4, 0x0d, 0xe0 }; // {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef,0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};//{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};//
+		const byte plain[] = "When we speak of man, we have a conception of humanity as a whole, and before applying scientific methods to the investigation of his movement we must accept this as a physical fact. But can anyone doubt to-day that all the millions of individuals and all the innumerable types and characters constitute an entity, a unit? Though free to think and act, we are held together, like the stars in the firmament, with ties inseparable. These ties cannot be seen, but we can feel them. I cut myself in the finger, and it pains me: this finger is a part of me. I see a friend hurt, and it hurts me, too: my friend and I are one. And now I see stricken down an enemy, a lump of matter which, of all the lumps of matter in the universe, I care least for, and it still grieves me. Does this not prove that each of us is only part of a whole?";
+
+
+		printf("%s\n", (char*)plain);
+		for(unsigned i=0; i<sizeof(plain); i++)
+		{
+			if(i%16==0)
+				printf("\n");
+			printf("%02X ", (unsigned char)plain[i]);
+		}
+
+
+		//for(unsigned i=0; i<sizeof(plain); i++)
+		//{
+		//	printf("%02X ", (unsigned char)plain[i]);
+		//}
+
+		printf("\n");
+
+		AES::Encryption aesEnc(key);
+		//CBC_Mode<AES>::Encryption modeE(plain, 16, plain);
+
+		std::string encryptedString;
+		//ECB_Mode_ExternalCipher::Encryption modeE(aesEnc);
+		//CBC_Mode_ExternalCipher::Encryption modeE(aesEnc, iv);
+		XBC_Mode_ExternalCipher::Encryption modeE(aesEnc, iv, iv2);
+		StreamTransformationFilter enc(modeE, new StringSink(encryptedString), StreamTransformationFilter::ZEROS_PADDING);
+		enc.Put((byte *)plain, sizeof(plain));
+		enc.MessageEnd();
+		
+		const char* encryptedCString = encryptedString.c_str();
+		unsigned len = strlen(encryptedCString);
+
+		for(unsigned i=0; i<encryptedString.length(); i++)
+		{
+			if(i%16==0)
+				printf("\n");
+			printf("%02X ", (unsigned char)encryptedCString[i]);
+		}
+
+		printf("\n");
+
+
+		AES::Decryption aesDec(key);
+		//CBC_Mode<AES>::Decryption modeD(plain, 16, plain);
+
+		std::string dencryptedString;
+		//ECB_Mode_ExternalCipher::Decryption modeD(aesDec);
+		//CBC_Mode_ExternalCipher::Decryption modeD(aesDec, iv);
+		XBC_Mode_ExternalCipher::Decryption modeD(aesDec, iv, iv2);
+		StreamTransformationFilter dec(modeD, new StringSink(dencryptedString), StreamTransformationFilter::ZEROS_PADDING);
+		dec.Put((byte *)encryptedCString, encryptedString.length());
+		dec.MessageEnd();
+
+		const char* dencryptedCString = dencryptedString.c_str();
+		unsigned delen = strlen(dencryptedCString);
+
+		for(unsigned i=0; i<dencryptedString.length(); i++)
+		{
+			if(i%16==0)
+				printf("\n");
+			printf("%02X ", (unsigned char)dencryptedCString[i]);
+		}
+
+		printf("\n\n");
+
+		//fail = !TestModeIV(modeE, modeD);
+		//pass = pass && !fail;
+		//cout << (fail ? "FAILED   " : "passed   ") << "AES CBC Mode" << endl;
+	}
+
+
+	//	{
+	//	// from FIPS 81
+	//	const byte encrypted[] = {
+	//		0xE5, 0xC7, 0xCD, 0xDE, 0x87, 0x2B, 0xF2, 0x7C, 
+	//		0x43, 0xE9, 0x34, 0x00, 0x8C, 0x38, 0x9C, 0x0F, 
+	//		0x68, 0x37, 0x88, 0x49, 0x9A, 0x7C, 0x05, 0xF6};
+
+	//	CBC_Mode_ExternalCipher::Encryption modeE(desE, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeE, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//		plain, sizeof(plain), encrypted, sizeof(encrypted));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC encryption with no padding" << endl;
+	//	
+	//	CBC_Mode_ExternalCipher::Decryption modeD(desD, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeD, NULL, StreamTransformationFilter::NO_PADDING).Ref(),
+	//		encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC decryption with no padding" << endl;
+
+	//	//fail = !TestModeIV(modeE, modeD);
+	//	//pass = pass && !fail;
+	//	//cout << (fail ? "FAILED   " : "passed   ") << "CBC mode IV generation" << endl;
+	//}
+	//{
+	//	// generated with Crypto++, matches FIPS 81
+	//	// but has extra 8 bytes as result of padding
+	//	const byte encrypted[] = {
+	//		0xE5, 0xC7, 0xCD, 0xDE, 0x87, 0x2B, 0xF2, 0x7C, 
+	//		0x43, 0xE9, 0x34, 0x00, 0x8C, 0x38, 0x9C, 0x0F, 
+	//		0x68, 0x37, 0x88, 0x49, 0x9A, 0x7C, 0x05, 0xF6, 
+	//		0x62, 0xC1, 0x6A, 0x27, 0xE4, 0xFC, 0xF2, 0x77};
+
+	//	CBC_Mode_ExternalCipher::Encryption modeE(desE, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeE).Ref(),
+	//		plain, sizeof(plain), encrypted, sizeof(encrypted));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC encryption with PKCS #7 padding" << endl;
+	//	
+	//	CBC_Mode_ExternalCipher::Decryption modeD(desD, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeD).Ref(),
+	//		encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC decryption with PKCS #7 padding" << endl;
+	//}
+	//{
+	//	// generated with Crypto++ 5.2, matches FIPS 81
+	//	// but has extra 8 bytes as result of padding
+	//	const byte encrypted[] = {
+	//		0xE5, 0xC7, 0xCD, 0xDE, 0x87, 0x2B, 0xF2, 0x7C, 
+	//		0x43, 0xE9, 0x34, 0x00, 0x8C, 0x38, 0x9C, 0x0F, 
+	//		0x68, 0x37, 0x88, 0x49, 0x9A, 0x7C, 0x05, 0xF6, 
+	//		0xcf, 0xb7, 0xc7, 0x64, 0x0e, 0x7c, 0xd9, 0xa7};
+
+	//	CBC_Mode_ExternalCipher::Encryption modeE(desE, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeE, NULL, StreamTransformationFilter::ONE_AND_ZEROS_PADDING).Ref(),
+	//		plain, sizeof(plain), encrypted, sizeof(encrypted));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC encryption with one-and-zeros padding" << endl;
+
+	//	CBC_Mode_ExternalCipher::Decryption modeD(desD, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeD, NULL, StreamTransformationFilter::ONE_AND_ZEROS_PADDING).Ref(),
+	//		encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC decryption with one-and-zeros padding" << endl;
+	//}
+	//{
+	//	const byte plain[] = {'a', 0, 0, 0, 0, 0, 0, 0};
+	//	// generated with Crypto++
+	//	const byte encrypted[] = {
+	//		0x9B, 0x47, 0x57, 0x59, 0xD6, 0x9C, 0xF6, 0xD0};
+
+	//	CBC_Mode_ExternalCipher::Encryption modeE(desE, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeE, NULL, StreamTransformationFilter::ZEROS_PADDING).Ref(),
+	//		plain, 1, encrypted, sizeof(encrypted));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC encryption with zeros padding" << endl;
+
+	//	CBC_Mode_ExternalCipher::Decryption modeD(desD, iv);
+	//	fail = !TestFilter(StreamTransformationFilter(modeD, NULL, StreamTransformationFilter::ZEROS_PADDING).Ref(),
+	//		encrypted, sizeof(encrypted), plain, sizeof(plain));
+	//	pass = pass && !fail;
+	//	cout << (fail ? "FAILED   " : "passed   ") << "CBC decryption with zeros padding" << endl;
+	//}
 
 	return true;
 }

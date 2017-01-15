@@ -246,28 +246,28 @@ NAMESPACE_END
 #define CRYPTOPP_UNCAUGHT_EXCEPTION_AVAILABLE
 #endif
 
-#ifdef CRYPTOPP_DISABLE_X86ASM		// for backwards compatibility: this macro had both meanings
+//#ifdef CRYPTOPP_DISABLE_X86ASM		// for backwards compatibility: this macro had both meanings
 #define CRYPTOPP_DISABLE_ASM
 #define CRYPTOPP_DISABLE_SSE2
-#endif
+//#endif
 
 #if !defined(CRYPTOPP_DISABLE_ASM) && ((defined(_MSC_VER) && defined(_M_IX86)) || (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))))
 	// C++Builder 2010 does not allow "call label" where label is defined within inline assembly
 	#define CRYPTOPP_X86_ASM_AVAILABLE
 
-	#if !defined(CRYPTOPP_DISABLE_SSE2) && (defined(CRYPTOPP_MSVC6PP_OR_LATER) || CRYPTOPP_GCC_VERSION >= 30300)
-		#define CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE 1
-	#else
+	//#if !defined(CRYPTOPP_DISABLE_SSE2) && (defined(CRYPTOPP_MSVC6PP_OR_LATER) || CRYPTOPP_GCC_VERSION >= 30300)
+	//	#define CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE 1
+	//#else
 		#define CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE 0
-	#endif
+	//#endif
 
 	// SSSE3 was actually introduced in GNU as 2.17, which was released 6/23/2006, but we can't tell what version of binutils is installed.
 	// GCC 4.1.2 was released on 2/13/2007, so we'll use that as a proxy for the binutils version.
-	#if !defined(CRYPTOPP_DISABLE_SSSE3) && (_MSC_VER >= 1400 || CRYPTOPP_GCC_VERSION >= 40102)
-		#define CRYPTOPP_BOOL_SSSE3_ASM_AVAILABLE 1
-	#else
+	//#if !defined(CRYPTOPP_DISABLE_SSSE3) && (_MSC_VER >= 1400 || CRYPTOPP_GCC_VERSION >= 40102)
+	//	#define CRYPTOPP_BOOL_SSSE3_ASM_AVAILABLE 1
+	//#else
 		#define CRYPTOPP_BOOL_SSSE3_ASM_AVAILABLE 0
-	#endif
+	//#endif
 #endif
 
 #if !defined(CRYPTOPP_DISABLE_ASM) && defined(_MSC_VER) && defined(_M_X64)
